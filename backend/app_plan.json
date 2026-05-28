@@ -1,0 +1,30 @@
+{
+  "app_type": "marketplace",
+  "app_name": "GreenLoop Exchange",
+  "tagline": "Source sustainable. Offset smarter. Grow greener.",
+  "primary_color": "#2E7D32",
+  "accent_color": "#81C784",
+  "sections": [
+    "Hero",
+    "Supplier Directory",
+    "Carbon Offset Store",
+    "Search & Filters",
+    "Company Profiles",
+    "Sustainability Insights"
+  ],
+  "backend_resources": [
+    "Suppliers",
+    "Products",
+    "Offsets",
+    "Orders",
+    "Users",
+    "Certifications"
+  ],
+  "features": [
+    "Verified green supplier listings with certifications",
+    "Carbon offset product catalog with impact metrics",
+    "Advanced search & filter by sustainability criteria",
+    "B2B ordering and procurement workflow",
+    "Sustainability dashboard for tracking footprint reduction"
+  ]
+}
