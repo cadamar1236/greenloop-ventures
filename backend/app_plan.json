@@ -1,30 +1,29 @@
 {
   "app_type": "marketplace",
-  "app_name": "GreenLoop Exchange",
-  "tagline": "Source sustainable. Offset smarter. Grow greener.",
+  "app_name": "GreenLoop Connect",
+  "tagline": "Find certified green suppliers and offset your carbon footprint in one trusted marketplace.",
   "primary_color": "#2E7D32",
   "accent_color": "#81C784",
   "sections": [
     "Hero",
     "Supplier Directory",
-    "Carbon Offset Store",
-    "Search & Filters",
-    "Company Profiles",
-    "Sustainability Insights"
+    "Carbon Offset Products",
+    "Green Certifications",
+    "How It Works",
+    "Testimonials",
+    "Contact Us"
   ],
   "backend_resources": [
-    "Suppliers",
-    "Products",
-    "Offsets",
-    "Orders",
-    "Users",
-    "Certifications"
+    "suppliers",
+    "products",
+    "certifications",
+    "reviews",
+    "orders",
+    "users"
   ],
   "features": [
-    "Verified green supplier listings with certifications",
-    "Carbon offset product catalog with impact metrics",
-    "Advanced search & filter by sustainability criteria",
-    "B2B ordering and procurement workflow",
-    "Sustainability dashboard for tracking footprint reduction"
+    "Advanced search and filters by certification, industry, and location",
+    "Supplier profiles with verified sustainability credentials",
+    "Integrated carbon offset product catalog"
   ]
 }
