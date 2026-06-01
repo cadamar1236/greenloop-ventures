@@ -48,7 +48,7 @@ function Sidebar({ filters, setFilters, isOpen, setIsOpen }) {
         <div className="p-4 border-b border-white/5">
           <div className="flex items-center gap-2 text-emerald-400">
             <Leaf className="w-5 h-5" />
-            <span className="font-semibold">GreenLoop Exchange</span>
+            <span className="font-semibold">GreenLoop Connect</span>
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
@@ -346,6 +346,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [quickViewSupplier, setQuickViewSupplier] = useState(null)
+  const [toast, setToast] = useState(null)
   const itemsPerPage = 6
 
   const filteredSuppliers = useMemo(() => {
@@ -371,11 +372,15 @@ export default function App() {
       let valA, valB
       if (sortBy === 'name') { valA = a.name; valB = b.name }
       else if (sortBy === 'rating') { valA = a.rating; valB = b.rating }
-      else if (sortBy === 'price') { valA = parseFloat(a.price.replace(/[$,]/g, '')); valB = parseFloat(b.price.replace(/[$,]/g, '')) }
-      else if (sortBy === 'reviews') { valA = a.reviews; valB = b.reviews }
-      if (valA < valB) return sortDir === 'asc' ? -1 : 1
-      if (valA > valB) return sortDir === 'asc' ? 1 : -1
-      return 0
+      else if (sortBy === 'price') { 
+        valA = parseFloat(a.price.replace(/[$,]/g, ''))
+        valB = parseFloat(b.price.replace(/[$,]/g, ''))
+      }
+      else { valA = a.name; valB = b.name }
+      if (typeof valA === 'string') {
+        return sortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
+      }
+      return sortDir === 'asc' ? valA - valB : valB - valA
     })
     return result
   }, [searchQuery, filters, sortBy, sortDir])
@@ -383,117 +388,102 @@ export default function App() {
   const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage)
   const paginatedSuppliers = filteredSuppliers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  const handleSort = (column) => {
-    if (sortBy === column) {
+  const handleSort = (field) => {
+    if (sortBy === field) {
       setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
     } else {
-      setSortBy(column)
+      setSortBy(field)
       setSortDir('asc')
     }
   }
 
+  const showToast = (message) => {
+    setToast(message)
+    setTimeout(() => setToast(null), 3000)
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden bg-[#06080f] text-slate-100">
+    <div className="flex h-screen overflow-hidden bg-[#06080f] text-slate-100 font-[Inter]">
       <Sidebar filters={filters} setFilters={setFilters} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0 bg-white/[0.02]">
+        <header className="h-14 flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0">
           <div className="flex items-center gap-4 flex-1">
-            <button className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <button className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors" onClick={() => setSidebarOpen(true)}>
               <Filter className="w-4 h-4 text-slate-400" />
             </button>
-            <div className="flex items-center gap-2 flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-500 flex-shrink-0" />
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search suppliers, categories, locations..."
                 value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1) }}
-                className="bg-transparent border-none outline-none text-sm text-slate-200 placeholder-slate-500 w-full"
+                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 transition-all"
               />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
-                value={filters.category}
-                onChange={e => { setFilters(prev => ({ ...prev, category: e.target.value })); setCurrentPage(1) }}
-                className="appearance-none bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-slate-200 pr-8 focus:outline-none focus:border-emerald-500/50"
-              >
-                {categories.map(cat => (
-                  <option key={cat} value={cat} className="bg-[#06080f]">{cat}</option>
-                ))}
-              </select>
-              <ChevronDown className="w-3 h-3 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span>Sort:</span>
+              <button onClick={() => handleSort('name')} className={`px-2 py-1 rounded text-xs ${sortBy === 'name' ? 'text-emerald-300 bg-emerald-500/10' : 'hover:text-slate-200'}`}>
+                Name {sortBy === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
+              </button>
+              <button onClick={() => handleSort('rating')} className={`px-2 py-1 rounded text-xs ${sortBy === 'rating' ? 'text-emerald-300 bg-emerald-500/10' : 'hover:text-slate-200'}`}>
+                Rating {sortBy === 'rating' && (sortDir === 'asc' ? '↑' : '↓')}
+              </button>
+              <button onClick={() => handleSort('price')} className={`px-2 py-1 rounded text-xs ${sortBy === 'price' ? 'text-emerald-300 bg-emerald-500/10' : 'hover:text-slate-200'}`}>
+                Price {sortBy === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+              </button>
             </div>
-            <button className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-              <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-            </button>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="mb-6">
-              <h1 className="text-2xl font-bold gradient-text">GreenLoop Exchange</h1>
-              <p className="text-sm text-slate-400 mt-1">Source sustainable. Offset smarter. Grow greener.</p>
+              <h1 className="text-2xl font-bold gradient-text">GreenLoop Connect Marketplace</h1>
+              <p className="text-slate-400 text-sm mt-1">Find certified green suppliers and offset your carbon footprint in one trusted marketplace</p>
             </div>
-
+            
             <FeaturedCarousel suppliers={suppliers} />
-
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-500">
-                Showing <span className="text-slate-300">{paginatedSuppliers.length}</span> of{' '}
-                <span className="text-slate-300">{filteredSuppliers.length}</span> suppliers
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Sort by:</span>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={e => setSortBy(e.target.value)}
-                    className="appearance-none bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-slate-200 pr-8 focus:outline-none focus:border-emerald-500/50"
-                  >
-                    <option value="name" className="bg-[#06080f]">Name</option>
-                    <option value="rating" className="bg-[#06080f]">Rating</option>
-                    <option value="price" className="bg-[#06080f]">Price</option>
-                    <option value="reviews" className="bg-[#06080f]">Reviews</option>
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-                <button
-                  onClick={() => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  <ArrowUpDown className={`w-4 h-4 text-slate-400 transition-transform ${sortDir === 'desc' ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-            </div>
-
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {(paginatedSuppliers || []).map(supplier => (
                 <SupplierCard key={supplier.id} supplier={supplier} onQuickView={setQuickViewSupplier} />
               ))}
             </div>
-
-            {paginatedSuppliers.length === 0 && (
+            
+            {filteredSuppliers.length === 0 && (
               <div className="text-center py-12">
                 <Package className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                 <p className="text-slate-400">No suppliers match your criteria</p>
-                <button
-                  onClick={() => { setSearchQuery(''); setFilters({ category: 'All', priceMax: 100, minRating: 0 }) }}
-                  className="mt-3 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+                <button 
+                  onClick={() => { setSearchQuery(''); setFilters({ category: 'All', priceMax: 100, minRating: 0 }); setCurrentPage(1) }}
+                  className="mt-3 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm transition-colors"
                 >
-                  Clear all filters
+                  Clear Filters
                 </button>
               </div>
             )}
-
-            {totalPages > 1 && (
+            
+            {filteredSuppliers.length > 0 && (
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             )}
           </div>
         </main>
       </div>
-      {quickViewSupplier && <QuickViewModal supplier={quickViewSupplier} onClose={() => setQuickViewSupplier(null)} />}
+      
+      {quickViewSupplier && (
+        <QuickViewModal supplier={quickViewSupplier} onClose={() => setQuickViewSupplier(null)} />
+      )}
+      
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 glass p-4 fade-in">
+          <div className="flex items-center gap-3">
+            <Award className="w-5 h-5 text-emerald-400" />
+            <p className="text-sm text-slate-200">{toast}</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
